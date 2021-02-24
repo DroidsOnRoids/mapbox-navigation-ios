@@ -169,7 +169,7 @@ public class NavigationViewportDataSource: ViewportDataSource {
         
         var headUnitPadding = UIEdgeInsets(top: 0.0, left: 100.0, bottom: 0.0, right: 0.0)
         var headUnitBearing = location?.course
-        var headUnitPitch = CGFloat(0.0)
+        var headUnitPitch = CGFloat(60.0)
         if passiveLocation != nil {
             headUnitBearing = 0.0
             headUnitPitch = 0.0

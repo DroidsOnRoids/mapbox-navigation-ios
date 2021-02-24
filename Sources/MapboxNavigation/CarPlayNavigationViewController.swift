@@ -247,6 +247,7 @@ public class CarPlayNavigationViewController: UIViewController {
         
         // Update the user puck
         navigationMapView?.updatePreferredFrameRate(for: routeProgress)
+        navigationMapView?.updateUserCourseView(location, animated: true)
         
         let congestionLevel = routeProgress.averageCongestionLevelRemainingOnLeg ?? .unknown
         guard let maneuver = carSession.upcomingManeuvers.first else { return }
