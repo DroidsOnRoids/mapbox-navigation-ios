@@ -54,18 +54,18 @@ public class NavigationCamera: NSObject, ViewportDataSourceDelegate {
     
     // MARK: - ViewportDataSourceDelegate methods
     
-    public func viewportDataSource(_ dataSource: ViewportDataSource, didUpdate cameraOptions: [CameraOptions.NotificationUserInfoKey : CameraOptions]) {
+    public func viewportDataSource(_ dataSource: ViewportDataSource, didUpdate cameraOptions: [String : CameraOptions]) {
         NSLog("[NavigationCamera] Current camera state: \(navigationCameraState)")
         
         switch navigationCameraState {
         case .following:
             switch navigationCameraType {
             case .headUnit:
-                if let followingHeadUnitCamera = cameraOptions[CameraOptions.NotificationUserInfoKey.followingHeadUnitCameraKey] {
+                if let followingHeadUnitCamera = cameraOptions[CameraOptions.followingHeadUnitCameraKey] {
                     cameraStateTransition.updateForFollowing(followingHeadUnitCamera, completion: nil)
                 }
             case .mobile:
-                if let followingMobileCamera = cameraOptions[CameraOptions.NotificationUserInfoKey.followingMobileCameraKey] {
+                if let followingMobileCamera = cameraOptions[CameraOptions.followingMobileCameraKey] {
                     cameraStateTransition.updateForFollowing(followingMobileCamera, completion: nil)
                 }
             }
@@ -74,11 +74,11 @@ public class NavigationCamera: NSObject, ViewportDataSourceDelegate {
         case .overview:
             switch navigationCameraType {
             case .headUnit:
-                if let overviewHeadUnitCamera = cameraOptions[CameraOptions.NotificationUserInfoKey.overviewHeadUnitCameraKey] {
+                if let overviewHeadUnitCamera = cameraOptions[CameraOptions.overviewHeadUnitCameraKey] {
                     cameraStateTransition.updateForOverview(overviewHeadUnitCamera, completion: nil)
                 }
             case .mobile:
-                if let overviewMobileCamera = cameraOptions[CameraOptions.NotificationUserInfoKey.overviewMobileCameraKey] {
+                if let overviewMobileCamera = cameraOptions[CameraOptions.overviewMobileCameraKey] {
                     cameraStateTransition.updateForOverview(overviewMobileCamera, completion: nil)
                 }
             }

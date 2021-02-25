@@ -61,7 +61,7 @@ class CustomViewportDataSource: ViewportDataSource {
         delegate?.viewportDataSource(self, didUpdate: cameraOptions)
     }
     
-    func cameraOptions(_ location: CLLocation?, routeProgress: RouteProgress? = nil) -> [CameraOptions.NotificationUserInfoKey: CameraOptions] {
+    func cameraOptions(_ location: CLLocation?, routeProgress: RouteProgress? = nil) -> [String: CameraOptions] {
         followingMobileCamera.center = location?.coordinate
         followingMobileCamera.bearing = location?.course
         followingMobileCamera.padding = UIEdgeInsets(top: 0.0, left: 0.0, bottom: 0.0, right: 0.0)
@@ -75,10 +75,10 @@ class CustomViewportDataSource: ViewportDataSource {
         overviewMobileCamera.pitch = 0.0
         
         let cameraOptions = [
-            CameraOptions.NotificationUserInfoKey.followingMobileCameraKey: followingMobileCamera,
-            CameraOptions.NotificationUserInfoKey.overviewMobileCameraKey: overviewMobileCamera,
-            CameraOptions.NotificationUserInfoKey.followingHeadUnitCameraKey: followingHeadUnitCamera,
-            CameraOptions.NotificationUserInfoKey.overviewHeadUnitCameraKey: overviewHeadUnitCamera
+            CameraOptions.followingMobileCameraKey: followingMobileCamera,
+            CameraOptions.overviewMobileCameraKey: overviewMobileCamera,
+            CameraOptions.followingHeadUnitCameraKey: followingHeadUnitCamera,
+            CameraOptions.overviewHeadUnitCameraKey: overviewHeadUnitCamera
         ]
         
         return cameraOptions

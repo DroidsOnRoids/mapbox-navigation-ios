@@ -27,5 +27,5 @@ public protocol ViewportDataSource {
 
 public protocol ViewportDataSourceDelegate {
     
-    func viewportDataSource(_ dataSource: ViewportDataSource, didUpdate cameraOptions: [CameraOptions.NotificationUserInfoKey: CameraOptions])
+    func viewportDataSource(_ dataSource: ViewportDataSource, didUpdate cameraOptions: [String: CameraOptions])
 }

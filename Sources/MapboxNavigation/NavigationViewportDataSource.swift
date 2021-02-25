@@ -9,21 +9,17 @@ public class NavigationViewportDataSource: ViewportDataSource {
     public var followingMobileCamera: CameraOptions = CameraOptions()
     
     public var followingHeadUnitCamera: CameraOptions = CameraOptions()
-
+    
     public var overviewMobileCamera: CameraOptions = CameraOptions()
     
     public var overviewHeadUnitCamera: CameraOptions = CameraOptions()
     
     /**
      Returns the altitude that the `NavigationCamera` initally defaults to.
+     This value is changed whenever user double taps on `MapView`.
      */
     // TODO: On CarPlay `defaultAltitude` should be set to 500.
-    public var defaultAltitude: CLLocationDistance = 1000.0 {
-        didSet {
-            // TODO: Make sure that changes to `currentAltitude` are required.
-            currentAltitude = defaultAltitude
-        }
-    }
+    public var altitude: CLLocationDistance = 1000.0
     
     /**
      Returns the altitude the map conditionally zooms out to when user is on a motorway, and the maneuver length is sufficently long.
@@ -52,15 +48,9 @@ public class NavigationViewportDataSource: ViewportDataSource {
      */
     public let defaultPadding: UIEdgeInsets = UIEdgeInsets(top: 10, left: 20, bottom: 10, right: 20)
     
-    /**
-     Current altitude in `MapView`. This value is changed whenever user double taps on `MapView`.
-     */
-    var currentAltitude: CLLocationDistance
-        
     weak var mapView: MapView?
     
     public required init(_ mapView: MapView) {
-        currentAltitude = defaultAltitude
         self.mapView = mapView
         
         subscribeForNotifications()
@@ -138,20 +128,20 @@ public class NavigationViewportDataSource: ViewportDataSource {
         }
         
         let cameraOptions = [
-            CameraOptions.NotificationUserInfoKey.followingMobileCameraKey: followingMobileCamera,
+            CameraOptions.followingMobileCameraKey: followingMobileCamera,
         ]
         delegate?.viewportDataSource(self, didUpdate: cameraOptions)
     }
     
-    func cameraOptions(_ passiveLocation: CLLocation?, activeLocation: CLLocation?, routeProgress: RouteProgress?) -> [CameraOptions.NotificationUserInfoKey: CameraOptions] {
+    func cameraOptions(_ passiveLocation: CLLocation?, activeLocation: CLLocation?, routeProgress: RouteProgress?) -> [String: CameraOptions] {
         updateFollowingCamera(passiveLocation, activeLocation: activeLocation, routeProgress: routeProgress)
         updateOverviewCamera(passiveLocation, activeLocation: activeLocation, routeProgress: routeProgress)
         
         let cameraOptions = [
-            CameraOptions.NotificationUserInfoKey.followingMobileCameraKey: followingMobileCamera,
-            CameraOptions.NotificationUserInfoKey.overviewMobileCameraKey: overviewMobileCamera,
-            CameraOptions.NotificationUserInfoKey.followingHeadUnitCameraKey: followingHeadUnitCamera,
-            CameraOptions.NotificationUserInfoKey.overviewHeadUnitCameraKey: overviewHeadUnitCamera
+            CameraOptions.followingMobileCameraKey: followingMobileCamera,
+            CameraOptions.overviewMobileCameraKey: overviewMobileCamera,
+            CameraOptions.followingHeadUnitCameraKey: followingHeadUnitCamera,
+            CameraOptions.overviewHeadUnitCameraKey: overviewHeadUnitCamera
         ]
         
         return cameraOptions
@@ -179,7 +169,7 @@ public class NavigationViewportDataSource: ViewportDataSource {
         followingMobileCamera.padding = mobilePadding
         
         if let latitude = location?.coordinate.latitude, let size = mapView?.bounds.size {
-            followingMobileCamera.zoom = CGFloat(ZoomLevelForAltitude(currentAltitude,
+            followingMobileCamera.zoom = CGFloat(ZoomLevelForAltitude(altitude,
                                                                       CGFloat(defaultPitch),
                                                                       latitude,
                                                                       size))
@@ -222,14 +212,14 @@ public class NavigationViewportDataSource: ViewportDataSource {
     
     @objc func updateAltitude(_ sender: UIGestureRecognizer) {
         if sender.state == .ended, let validAltitude = mapView?.altitude {
-            currentAltitude = validAltitude
+            altitude = validAltitude
         }
         
         // Capture altitude for double tap and two finger tap after animation finishes
         if sender is UITapGestureRecognizer, sender.state == .ended {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: {
                 if let altitude = self.mapView?.altitude {
-                    self.currentAltitude = altitude
+                    self.altitude = altitude
                 }
             })
         }

@@ -249,7 +249,7 @@ class ViewController: UIViewController {
         // `NavigationCamera` behavior.
         if let mapView = navigationViewController.navigationMapView?.mapView {
             let customViewportDataSource = NavigationViewportDataSource(mapView)
-            customViewportDataSource.defaultAltitude = 100.0
+            customViewportDataSource.altitude = 100.0
             navigationViewController.navigationMapView?.navigationCamera.viewportDataSource = customViewportDataSource
             
             let customCameraStateTransition = CustomCameraStateTransition(mapView)
