@@ -507,6 +507,14 @@ extension NavigationViewController: RouteMapViewControllerDelegate {
         delegate?.navigationViewController(self, shapeFor: waypoints, legIndex: legIndex)
     }
 
+    public func navigationMapView(_ mapView: NavigationMapView, shapeFor routes: [Route]) -> LineString? {
+        return delegate?.navigationViewController(self, shapeFor: routes)
+    }
+
+    public func navigationMapView(_ mapView: NavigationMapView, casingShapeFor route: Route) -> LineString? {
+        return delegate?.navigationViewController(self, casingShapeFor: route)
+    }
+
     public func navigationMapView(_ navigationMapView: NavigationMapView, didSelect route: Route) {
         delegate?.navigationViewController(self, didSelect: route)
     }

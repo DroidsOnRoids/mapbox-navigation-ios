@@ -558,7 +558,7 @@ extension ViewController: NavigationMapViewDelegate {
         return lineLayer
     }
     
-    func navigationMapView(_ navigationMapView: NavigationMapView, shapeFor route: Route) -> LineString? {
+    func navigationMapView(_ navigationMapView: NavigationMapView, shapeFor routes: [Route]) -> LineString? {
         return nil
     }
     

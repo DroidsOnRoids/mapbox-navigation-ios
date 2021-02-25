@@ -16,4 +16,8 @@ struct IdentifierString {
     static let waypointSource = "\(identifier)_waypointSource"
     static let waypointCircle = "\(identifier)_waypointCircle"
     static let waypointSymbol = "\(identifier)_waypointSymbol"
+    static let routesSource = "\(identifier)_routesSource"
+    static let routeCasingSource = "\(identifier)_routeCasingSource"
+    static let routes = "\(identifier)_routes"
+    static let routeCasing = "\(identifier)_routeCasing"
 }

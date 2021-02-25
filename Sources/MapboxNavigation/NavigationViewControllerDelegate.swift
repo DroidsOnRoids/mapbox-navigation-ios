@@ -138,6 +138,20 @@ public protocol NavigationViewControllerDelegate: VisualInstructionDelegate {
      If this method is not implemented, the navigation view controller’s map view draws the casing for the route line using default `LineLayer`.
     */
     func navigationViewController(_ navigationViewController: NavigationViewController, routeCasingLineLayerWithIdentifier identifier: String, sourceIdentifier: String) -> LineLayer?
+
+    /**
+     Returns an `LineString` that represents the path of the routes line.
+
+     If this method is unimplemented, the navigation view controller’s map view represents the route line using an `Feature` based on `route`’s `coordinates` property.
+     */
+    func navigationViewController(_ navigationViewController: NavigationViewController, shapeFor routes: [Route]) -> LineString?
+
+    /**
+     Returns an `LineString` that represents the path of the route line’s casing.
+
+     If this method is unimplemented, the navigation view controller’s map view represents the route line’s casing using an `Feature` identical to the one returned by `navigationViewController(_:shapeFor:)`.
+     */
+    func navigationViewController(_ navigationViewController: NavigationViewController, casingShapeFor route: Route) -> LineString?
     
     /**
      Called when the user taps to select a route on the navigation view controller’s map view.
@@ -277,6 +291,22 @@ public extension NavigationViewControllerDelegate {
      */
     func navigationViewController(_ navigationViewController: NavigationViewController, shapeFor waypoints: [Waypoint], legIndex: Int) -> FeatureCollection? {
         logUnimplemented(protocolType: NavigationViewControllerDelegate.self, level: .debug)
+        return nil
+    }
+
+    /**
+     `UnimplementedLogging` prints a warning to standard output the first time this method is called.
+     */
+    func navigationViewController(_ navigationViewController: NavigationViewController, shapeFor routes: [Route]) -> LineString? {
+        logUnimplemented(protocolType: NavigationViewControllerDelegate.self,  level: .debug)
+        return nil
+    }
+
+    /**
+     `UnimplementedLogging` prints a warning to standard output the first time this method is called.
+     */
+    func navigationViewController(_ navigationViewController: NavigationViewController, casingShapeFor route: Route) -> LineString? {
+        logUnimplemented(protocolType: NavigationViewControllerDelegate.self,  level: .debug)
         return nil
     }
 

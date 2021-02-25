@@ -417,12 +417,50 @@ open class NavigationMapView: UIView {
         mapView.cameraManager.setCamera(to: newCamera, animated: animated, completion: nil)
     }
     
+    var routeFeatures = [Feature]()
+    var casingFeatures = [Feature]()
+
     public func show(_ routes: [Route], legIndex: Int = 0) {
         removeRoutes()
         
         self.routes = routes
         
-        // TODO: Add ability to handle legIndex.
+        guard let mainRoute = routes.first else { return }
+        guard let polyline = delegate?.navigationMapView(self, shapeFor: routes) ?? shape(for: routes, legIndex: legIndex) else { return }
+        guard let mainPolylineSimplified = delegate?.navigationMapView(self, casingShapeFor: mainRoute) ?? shape(forCasingOf: mainRoute, legIndex: legIndex) else { return }
+
+        let sourceIdentifier = IdentifierString.routesSource
+        let casingSourceIdentifier = IdentifierString.routeCasingSource
+
+        if let _ = try? mapView.style.getSource(identifier: sourceIdentifier, type: GeoJSONSource.self).get(),
+           let _ = try? mapView.style.getSource(identifier: casingSourceIdentifier, type: GeoJSONSource.self).get() {
+            let routesSource = Feature.init(polyline)
+            let routeCasingSource = Feature.init(mainPolylineSimplified)
+            mapView.style.updateGeoJSON(for: sourceIdentifier, with: routesSource)
+            mapView.style.updateGeoJSON(for: casingSourceIdentifier, with: routeCasingSource)
+        } else {
+            var routesSource = GeoJSONSource()
+            var routeCasingSource = GeoJSONSource()
+            routesSource.data = .geometry(.lineString(polyline))
+            routesSource.lineMetrics = true
+            routeCasingSource.data = .geometry(.lineString(mainPolylineSimplified))
+            routeCasingSource.lineMetrics = true
+
+            //TODO: add routesSource and routeCasingSource below
+
+            let routesIdentifier = IdentifierString.routes
+            let routeCasingIdentifier = IdentifierString.routeCasing
+
+            var routesLayer = delegate?.navigationMapView(self,
+                                                          routeLineLayerWithIdentifier: routesIdentifier,
+                                                          sourceIdentifier: sourceIdentifier) ?? routeSyleLayer(identifier:routesIdentifier, source: sourceIdentifier)
+            var routeCasingLayer = delegate?.navigationMapView(self,
+                                                               routeLineLayerWithIdentifier: casingSourceIdentifier,
+                                                               sourceIdentifier: casingSourceIdentifier) ?? routeCasingStyleLayer(identifier: routeCasingIdentifier, source: casingSourceIdentifier)
+
+            //TODO: add routesLayer and routeCasingLayer below
+        }
+
         var parentLayerIdentifier: String? = nil
         for (index, route) in routes.enumerated() {
             if index == 0, routeLineTracksTraversal {
@@ -433,8 +471,50 @@ open class NavigationMapView: UIView {
             parentLayerIdentifier = addRouteCasingLayer(route, below: parentLayerIdentifier, isMainRoute: index == 0)
         }
     }
-    
-    @discardableResult func addRouteLayer(_ route: Route, below parentLayerIndentifier: String? = nil, isMainRoute: Bool = true) -> String? {
+
+    func shape(for routes: [Route], legIndex: Int?) -> LineString? {
+        if routes.count == 1 { return routes.first?.shape }
+
+        guard var coordinates = routes.first?.shape?.coordinates else { return nil }
+        for route in routes.suffix(from: 1) {
+            if let currentCoordinates = route.shape?.coordinates {
+                coordinates = coordinates + currentCoordinates
+            }
+            //TODO: add the generation of routeFeatures
+        }
+        return LineString(coordinates)
+    }
+
+    func shape(forCasingOf route: Route, legIndex: Int?) -> LineString? {
+        //TODO: add the generation of casingFeatures
+        return route.shape
+    }
+
+    //TODO: add delegate chain
+    func routeSyleLayer(identifier: String, source: String) -> LineLayer {
+        var lineLayer = LineLayer(id: identifier)
+        lineLayer.source = source
+        lineLayer.paint?.lineWidth = .expression(Expression.routeLineWidthExpression())
+        lineLayer.layout?.lineJoin = .round
+
+        //TODO: add the expression from routeFeatures to lineOpacity and lineColor
+
+        return lineLayer
+    }
+
+    //TODO: add delegate chain
+    func routeCasingStyleLayer(identifier: String, source: String) -> LineLayer {
+        var lineCasing = LineLayer(id: identifier)
+        lineCasing.source = source
+        lineCasing.layout?.lineJoin = .round
+        lineCasing.layout?.lineCap = .round
+
+        //TODO: add the expression from casingFeatures to lineOpacity and lineColor
+
+        return lineCasing
+    }
+
+    @discardableResult func addRouteLayer(_ route: Route, below parentLayerIndentifier: String? = nil, isMainRoute: Bool = true, legIndex: Int = 0) -> String? {
         guard let shape = route.shape else { return nil }
         
         var geoJSONSource = GeoJSONSource()
