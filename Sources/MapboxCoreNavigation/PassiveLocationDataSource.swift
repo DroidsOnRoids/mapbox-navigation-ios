@@ -22,16 +22,24 @@ open class PassiveLocationDataSource: NSObject {
         self.directions = directions
         
         let settingsProfile = SettingsProfile(application: ProfileApplication.kMobile, platform: ProfilePlatform.KIOS)
-        self.navigator = try! Navigator(profile: settingsProfile,
-                                        config: NavigatorConfig(),
-                                        customConfig: "",
-                                        tilesConfig: TilesConfig())
+        let config = try! ConfigFactory.build(for: settingsProfile, config: NavigatorConfig(), customConfig: "")
+        let runLoopExecutor = try! RunLoopExecutorFactory.build()
+        let historyRecorder = try! HistoryRecorderHandle.build(forConfig: config)
+        let cache = try! CacheFactory.build(for: TilesConfig(), config: config, runLoop: runLoopExecutor, historyRecorder: historyRecorder)
+        self.graphAccessor = try! GraphAccessor(cache: cache)
+        self.navigator = try! Navigator(config: config, runLoopExecutor: runLoopExecutor, cache: cache, historyRecorder: historyRecorder)
 
         self.systemLocationManager = systemLocationManager ?? NavigationLocationManager()
-        
+
         super.init()
-        
+
         self.systemLocationManager.delegate = self
+
+        try! self.navigator.setElectronicHorizonObserverFor(self)
+    }
+
+    deinit {
+        try! self.navigator.setElectronicHorizonObserverFor(nil)
     }
     
     /**
@@ -60,6 +68,11 @@ open class PassiveLocationDataSource: NSObject {
      The location data source’s delegate.
      */
     public weak var delegate: PassiveLocationDataSourceDelegate?
+
+    /**
+     Delegate for Electronic Horizon updates.
+     */
+    public weak var electronicHorizonDelegate: ElectronicHorizonDelegate?
     
     /**
      Starts the generation of location updates with an optional completion handler that gets called when the location data source is ready to receive snapped location updates.
@@ -85,6 +98,21 @@ open class PassiveLocationDataSource: NSObject {
             }
         }
     }
+
+    /**
+     Sets electronic horizon options. Pass `nil` to reset to defaults.
+     */
+    public func set(electronicHorizonOptions: ElectronicHorizonOptions?) {
+        try! navigator.setElectronicHorizonOptionsFor(electronicHorizonOptions)
+    }
+
+    public var graphAccessor: GraphAccessor
+
+    public var roadObjectsStore: RoadObjectsStore {
+        return try! navigator.roadObjectStore()
+    }
+
+    public var peer: MBXPeerWrapper?
     
     /**
      Creates a cache for tiles of the given version and configures the navigator to use this cache.
@@ -180,6 +208,20 @@ extension PassiveLocationDataSource: CLLocationManagerDelegate {
         if #available(iOS 14.0, *) {
             delegate?.passiveLocationDataSourceDidChangeAuthorization(self)
         }
+    }
+}
+
+extension PassiveLocationDataSource: ElectronicHorizonObserver {
+    public func onPositionUpdated(for position: ElectronicHorizonPosition, distances: [String : RoadObjectDistanceInfo]) {
+        electronicHorizonDelegate?.didUpdatePosition(position, distances: distances)
+    }
+
+    public func onRoadObjectEnter(for info: RoadObjectEnterExitInfo) {
+        electronicHorizonDelegate?.roadObjectDidEnter(info)
+    }
+
+    public func onRoadObjectExit(for info: RoadObjectEnterExitInfo) {
+        electronicHorizonDelegate?.roadObjectDidExit(info)
     }
 }
 

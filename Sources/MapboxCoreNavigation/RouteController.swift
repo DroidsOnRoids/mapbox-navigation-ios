@@ -24,6 +24,7 @@ open class RouteController: NSObject {
     struct NavigatorResources {
         let navigator: Navigator
         let historyRecorder: HistoryRecorderHandle
+        let graphAccessor: GraphAccessor
     }
 
     lazy var navigatorResources: NavigatorResources = {
@@ -31,13 +32,15 @@ open class RouteController: NSObject {
             application: ProfileApplication.kMobile,
             platform: ProfilePlatform.KIOS
         )
-        
+
         let config = try! ConfigFactory.build(for: settingsProfile, config: NavigatorConfig(), customConfig: "")
         let runLoopExecutor = try! RunLoopExecutorFactory.build()
         let historyRecorder = try! HistoryRecorderHandle.build(forConfig: config)
         let cache = try! CacheFactory.build(for: TilesConfig(), config: config, runLoop: runLoopExecutor, historyRecorder: historyRecorder)
+        let graphAccessor = try! GraphAccessor(cache: cache)
         let navigator = try! Navigator(config: config, runLoopExecutor: runLoopExecutor, cache: cache, historyRecorder: historyRecorder)
-        return NavigatorResources(navigator: navigator, historyRecorder: historyRecorder)
+        try! navigator.setElectronicHorizonObserverFor(self)
+        return NavigatorResources(navigator: navigator, historyRecorder: historyRecorder, graphAccessor: graphAccessor)
     }()
     
     var navigator: Navigator {
@@ -149,6 +152,11 @@ open class RouteController: NSObject {
      The route controller’s delegate.
      */
     public weak var delegate: RouterDelegate?
+
+    /**
+     Delegate for Electronic Horizon updates.
+     */
+    public weak var electronicHorizonDelegate: ElectronicHorizonDelegate?
     
     /**
      The route controller’s associated location manager.
@@ -183,6 +191,7 @@ open class RouteController: NSObject {
     
     deinit {
         resetObservation(for: _routeProgress)
+        try! navigator.setElectronicHorizonObserverFor(nil)
     }
     
     func resetObservation(for progress: RouteProgress) {
@@ -413,6 +422,23 @@ open class RouteController: NSObject {
     public func locationHistory() throws -> Data {
         return try navigatorResources.historyRecorder.getHistory()
     }
+
+    /**
+     Sets electronic horizon options. Pass `nil` to reset to defaults.
+     */
+    public func set(electronicHorizonOptions: ElectronicHorizonOptions?) {
+        try! navigator.setElectronicHorizonOptionsFor(electronicHorizonOptions)
+    }
+
+    public var graphAccessor: GraphAccessor {
+        return navigatorResources.graphAccessor
+    }
+
+    public var roadObjectsStore: RoadObjectsStore {
+        return try! navigator.roadObjectStore()
+    }
+
+    public var peer: MBXPeerWrapper?
 }
 
 extension RouteController: Router {
@@ -483,3 +509,17 @@ extension RouteController: Router {
 }
 
 extension RouteController: InternalRouter { }
+
+extension RouteController: ElectronicHorizonObserver {
+    public func onPositionUpdated(for position: ElectronicHorizonPosition, distances: [String : RoadObjectDistanceInfo]) {
+        electronicHorizonDelegate?.didUpdatePosition(position, distances: distances)
+    }
+
+    public func onRoadObjectEnter(for info: RoadObjectEnterExitInfo) {
+        electronicHorizonDelegate?.roadObjectDidEnter(info)
+    }
+
+    public func onRoadObjectExit(for info: RoadObjectEnterExitInfo) {
+        electronicHorizonDelegate?.roadObjectDidExit(info)
+    }
+}
