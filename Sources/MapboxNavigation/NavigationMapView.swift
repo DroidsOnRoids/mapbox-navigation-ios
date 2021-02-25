@@ -473,20 +473,38 @@ open class NavigationMapView: UIView {
     }
 
     func shape(for routes: [Route], legIndex: Int?) -> LineString? {
+        guard var coordinates = routes.first?.shape?.coordinates else { return nil }
+
+        routeFeatures = routes.first!.congestionFeatures(legIndex: legIndex, isAlternativeRoute: false, roadClassesWithOverriddenCongestionLevels: roadClassesWithOverriddenCongestionLevels)
         if routes.count == 1 { return routes.first?.shape }
 
-        guard var coordinates = routes.first?.shape?.coordinates else { return nil }
+        var altRoutesFeature = [Feature]()
         for route in routes.suffix(from: 1) {
             if let currentCoordinates = route.shape?.coordinates {
                 coordinates = coordinates + currentCoordinates
+                var feature = Feature(LineString(currentCoordinates))
+                feature.properties = ["isAlternativeRoute": true]
+                altRoutesFeature.append(feature)
             }
-            //TODO: add the generation of routeFeatures
         }
+        routeFeatures = routeFeatures + altRoutesFeature
         return LineString(coordinates)
     }
 
     func shape(forCasingOf route: Route, legIndex: Int?) -> LineString? {
-        //TODO: add the generation of casingFeatures
+        casingFeatures = [Feature]()
+
+        for (index, leg) in route.legs.enumerated() {
+            let legCoordinates: [CLLocationCoordinate2D] = leg.steps.enumerated().reduce([]) { allCoordinates, current in
+                let index = current.offset
+                let step = current.element
+                let stepCoordinates = step.shape!.coordinates
+                return index == 0 ? stepCoordinates : allCoordinates + stepCoordinates.suffix(from: 1)
+            }
+            var feature = Feature(LineString(legCoordinates))
+            feature.properties = [CurrentLegAttribute: (legIndex != nil) ? index == legIndex : index == 0]
+            casingFeatures.append(feature)
+        }
         return route.shape
     }
 
