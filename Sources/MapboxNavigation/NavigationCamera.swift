@@ -49,7 +49,7 @@ public class NavigationCamera: NSObject, ViewportDataSourceDelegate {
     }
     
     func unregisterNavigationCameraStateObserver(_ navigationCameraStateObserver: NavigationCameraStateObserver) {
-        // TODO: Add ability to remove subscribers.
+        navigationCameraStateObservers.removeAll(where: { $0 === navigationCameraStateObserver })
     }
     
     // MARK: - ViewportDataSourceDelegate methods

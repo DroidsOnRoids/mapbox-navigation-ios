@@ -1,6 +1,6 @@
 import Foundation
 
-protocol NavigationCameraStateObserver {
+protocol NavigationCameraStateObserver: class {
     
     func navigationCameraStateDidChange(_ navigationCamera: NavigationCamera, navigationCameraState: NavigationCameraState)
 }

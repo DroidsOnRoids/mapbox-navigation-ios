@@ -245,6 +245,17 @@ class ViewController: UIViewController {
         // Control floating buttons position in a navigation view.
         navigationViewController.floatingButtonsPosition = .topTrailing
         
+        // Modify default `NavigationViewportDataSource` and `NavigationCameraStateTransition` to change
+        // `NavigationCamera` behavior.
+        if let mapView = navigationViewController.navigationMapView?.mapView {
+            let customViewportDataSource = NavigationViewportDataSource(mapView)
+            customViewportDataSource.defaultAltitude = 100.0
+            navigationViewController.navigationMapView?.navigationCamera.viewportDataSource = customViewportDataSource
+            
+            let customCameraStateTransition = CustomCameraStateTransition(mapView)
+            navigationViewController.navigationMapView?.navigationCamera.cameraStateTransition = customCameraStateTransition
+        }
+        
         present(navigationViewController, completion: nil)
     }
     

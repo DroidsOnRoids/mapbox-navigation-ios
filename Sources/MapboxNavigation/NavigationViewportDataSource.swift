@@ -18,7 +18,12 @@ public class NavigationViewportDataSource: ViewportDataSource {
      Returns the altitude that the `NavigationCamera` initally defaults to.
      */
     // TODO: On CarPlay `defaultAltitude` should be set to 500.
-    public var defaultAltitude: CLLocationDistance = 1000.0
+    public var defaultAltitude: CLLocationDistance = 1000.0 {
+        didSet {
+            // TODO: Make sure that changes to `currentAltitude` are required.
+            currentAltitude = defaultAltitude
+        }
+    }
     
     /**
      Returns the altitude the map conditionally zooms out to when user is on a motorway, and the maneuver length is sufficently long.
@@ -46,17 +51,30 @@ public class NavigationViewportDataSource: ViewportDataSource {
      Showcases route array. Adds routes and waypoints to map, and sets camera to point encompassing the route.
      */
     public let defaultPadding: UIEdgeInsets = UIEdgeInsets(top: 10, left: 20, bottom: 10, right: 20)
+    
+    /**
+     Current altitude in `MapView`. This value is changed whenever user double taps on `MapView`.
+     */
+    var currentAltitude: CLLocationDistance
         
     weak var mapView: MapView?
     
     public required init(_ mapView: MapView) {
+        currentAltitude = defaultAltitude
         self.mapView = mapView
         
         subscribeForNotifications()
+        makeGestureRecognizersUpdateAltitude()
     }
     
     deinit {
         unsubscribeFromNotifications()
+    }
+    
+    func makeGestureRecognizersUpdateAltitude() {
+        for gestureRecognizer in mapView?.gestureRecognizers ?? [] {
+            gestureRecognizer.addTarget(self, action: #selector(updateAltitude(_:)))
+        }
     }
     
     // MARK: - Notifications observer methods
@@ -161,7 +179,7 @@ public class NavigationViewportDataSource: ViewportDataSource {
         followingMobileCamera.padding = mobilePadding
         
         if let latitude = location?.coordinate.latitude, let size = mapView?.bounds.size {
-            followingMobileCamera.zoom = CGFloat(ZoomLevelForAltitude(defaultAltitude,
+            followingMobileCamera.zoom = CGFloat(ZoomLevelForAltitude(currentAltitude,
                                                                       CGFloat(defaultPitch),
                                                                       latitude,
                                                                       size))
@@ -202,55 +220,18 @@ public class NavigationViewportDataSource: ViewportDataSource {
         // TODO: Change `CameraOptions` when re-reouting occurs.
     }
     
-    // @objc func updateCourseView(_ sender: UIGestureRecognizer) {
-    //     if sender.state == .ended, let validAltitude = mapView?.altitude {
-    //         // altitude = validAltitude
-    //         enableFrameByFrameCourseViewTracking(for: 2)
-    //     }
-    //     
-    //     // Capture altitude for double tap and two finger tap after animation finishes
-    //     if sender is UITapGestureRecognizer, sender.state == .ended {
-    //         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: {
-    //             // if let altitude = self.mapView.altitude {
-    //             //     self.altitude = altitude
-    //             // }
-    //         })
-    //     }
-    // }
-    // 
-    // public func enableFrameByFrameCourseViewTracking(for duration: TimeInterval) {
-    //     NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector(disableFrameByFramePositioning), object: nil)
-    //     perform(#selector(disableFrameByFramePositioning), with: nil, afterDelay: duration)
-    //     mapView?.preferredFPS = .maximum
-    // }
-    // 
-    // @objc fileprivate func disableFrameByFramePositioning() {
-    //     mapView?.preferredFPS = .normal
-    // }
-    
-    // CarPlay
-    // func contentInset(forOverviewing overviewing: Bool) -> UIEdgeInsets {
-    //     guard let mapView = mapView else { return .zero }
-    //
-    //     var insets = mapView.safeArea
-    //
-    //     if !overviewing {
-    //         // Puck position calculation - position it just above the bottom of the content area.
-    //         var contentFrame = mapView.bounds.inset(by: insets)
-    //
-    //         // Avoid letting the puck go partially off-screen, and add a comfortable padding beyond that.
-    //         let courseViewBounds = mapView.userCourseView.bounds
-    //
-    //         // If it is not possible to position it right above the content area, center it at the remaining space.
-    //         contentFrame = contentFrame.insetBy(dx: min(courseViewMinimumInsets.left + courseViewBounds.width / 2.0, contentFrame.width / 2.0),
-    //                                             dy: min(courseViewMinimumInsets.top + courseViewBounds.height / 2.0, contentFrame.height / 2.0))
-    //         assert(!contentFrame.isInfinite)
-    //
-    //         let y = contentFrame.maxY
-    //         let height = mapView.bounds.height
-    //         insets.top = height - insets.bottom - 2 * (height - insets.bottom - y)
-    //     }
-    //
-    //     return insets
-    // }
+    @objc func updateAltitude(_ sender: UIGestureRecognizer) {
+        if sender.state == .ended, let validAltitude = mapView?.altitude {
+            currentAltitude = validAltitude
+        }
+        
+        // Capture altitude for double tap and two finger tap after animation finishes
+        if sender is UITapGestureRecognizer, sender.state == .ended {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: {
+                if let altitude = self.mapView?.altitude {
+                    self.currentAltitude = altitude
+                }
+            })
+        }
+    }
 }
