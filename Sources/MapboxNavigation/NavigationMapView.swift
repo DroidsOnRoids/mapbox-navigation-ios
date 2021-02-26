@@ -433,10 +433,27 @@ open class NavigationMapView: UIView {
             parentLayerIdentifier = addRouteCasingLayer(route, below: parentLayerIdentifier, isMainRoute: index == 0)
 
             guard let routeFeatures = delegate?.navigationMapView(self, shapeFor: mainRoute) ?? shape(for: mainRoute, legIndex: legIndex, isMainRoute: index == 0) else { return }
-            guard let casingFeatures = delegate?.navigationMapView(self, casingShapeFor: mainRoute) ?? shape(forCasingOf: mainRoute, legIndex: legIndex) else { return }
+            var geoJSONSource = GeoJSONSource()
+            geoJSONSource.data = .featureCollection(routeFeatures)
+            geoJSONSource.lineMetrics = true
+            let sourceIdentifier = route.identifier(.source(isMainRoute: index == 0, isSourceCasing: true))
+            mapView.style.addSource(source: geoJSONSource, identifier: sourceIdentifier)
 
-            //add the call to form sources and layers to form routeFeatures and casingFeatures
+            let layerIdentifier = route.identifier(.route(isMainRoute: index == 0))
+            let routeLine = routeStyleLayer(identifier: layerIdentifier, source: sourceIdentifier)
+            // add routeLine below
         }
+
+        guard let casingFeatures = delegate?.navigationMapView(self, casingShapeFor: mainRoute) ?? shape(forCasingOf: mainRoute, legIndex: legIndex) else { return }
+        var geoJSONSource = GeoJSONSource()
+        geoJSONSource.data = .featureCollection(casingFeatures)
+        geoJSONSource.lineMetrics = true
+        let sourceIdentifier = IdentifierString.routeCasingSource
+        mapView.style.addSource(source: geoJSONSource, identifier: sourceIdentifier)
+
+        let layerIdentifier = IdentifierString.routeCasing
+        let routeCasing = routeCasingStyleLayer(identifier: layerIdentifier, source: sourceIdentifier)
+        // add routeCasing below
     }
 
     func shape(for route: Route, legIndex: Int?, isMainRoute: Bool?) -> FeatureCollection? {
@@ -471,25 +488,38 @@ open class NavigationMapView: UIView {
     }
 
     //TODO: add delegate chain
-    func routeSyleLayer(identifier: String, source: String) -> LineLayer {
-        var lineLayer = LineLayer(id: identifier)
-        lineLayer.source = source
-        lineLayer.paint?.lineWidth = .expression(Expression.routeLineWidthExpression())
-        lineLayer.layout?.lineJoin = .round
+    func routeStyleLayer(identifier: String, source: String) -> LineLayer? {
+        var lineLayer = delegate?.navigationMapView(self,
+                                                    routeLineLayerWithIdentifier: identifier,
+                                                    sourceIdentifier: source)
+        if lineLayer == nil {
+            lineLayer = LineLayer(id: identifier)
+            lineLayer?.source = source
+            lineLayer?.paint?.lineColor = .constant(.init(color: trafficUnknownColor))
+            lineLayer?.paint?.lineWidth = .expression(Expression.routeLineWidthExpression())
+            lineLayer?.layout?.lineJoin = .round
+            lineLayer?.layout?.lineCap = .round
 
-        //TODO: add the expression from routeFeatures to lineOpacity and lineColor
+            //TODO: add the expression form gradientStop from routeFeatures to lineOpacity and lineColor, allow vanishing route line
+        }
 
         return lineLayer
     }
 
     //TODO: add delegate chain
-    func routeCasingStyleLayer(identifier: String, source: String) -> LineLayer {
-        var lineCasing = LineLayer(id: identifier)
-        lineCasing.source = source
-        lineCasing.layout?.lineJoin = .round
-        lineCasing.layout?.lineCap = .round
-
-        //TODO: add the expression from casingFeatures to lineOpacity and lineColor
+    func routeCasingStyleLayer(identifier: String, source: String) -> LineLayer? {
+        var lineCasing = delegate?.navigationMapView(self,
+                                                     routeCasingLineLayerWithIdentifier: identifier,
+                                                     sourceIdentifier: source)
+        if lineCasing == nil {
+            lineCasing = LineLayer(id: identifier)
+            lineCasing?.source = source
+            lineCasing?.paint?.lineColor = .constant(.init(color: routeCasingColor))
+            lineCasing?.paint?.lineWidth = .expression(Expression.routeLineWidthExpression(1.5))
+            lineCasing?.layout?.lineJoin = .round
+            lineCasing?.layout?.lineCap = .round
+            //TODO: add the expression form gradientStop from casingFeatures to lineOpacity and lineColor
+        }
 
         return lineCasing
     }
