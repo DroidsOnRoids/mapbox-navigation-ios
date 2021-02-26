@@ -687,11 +687,11 @@ extension RouteMapViewController: NavigationViewDelegate {
         return delegate?.navigationMapView(navigationMapView, routeCasingLineLayerWithIdentifier: identifier, sourceIdentifier: sourceIdentifier)
     }
     
-    func navigationMapView(_ mapView: NavigationMapView, shapeFor routes: [Route]) -> LineString? {
-        return delegate?.navigationMapView(mapView, shapeFor: routes)
+    func navigationMapView(_ mapView: NavigationMapView, shapeFor route: Route) -> FeatureCollection? {
+        return delegate?.navigationMapView(mapView, shapeFor: route)
     }
 
-    func navigationMapView(_ mapView: NavigationMapView, casingShapeFor route: Route) -> LineString? {
+    func navigationMapView(_ mapView: NavigationMapView, casingShapeFor route: Route) -> FeatureCollection? {
         return delegate?.navigationMapView(mapView, casingShapeFor: route)
     }
 

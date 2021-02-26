@@ -33,22 +33,22 @@ public protocol NavigationMapViewDelegate: class, UnimplementedLogging {
     /**
      Asks the receiver to return an `LineString` that describes the geometry of the route.
         
-     Resulting `LineString` will then be styled using `NavigationMapView.navigationMapView(_:routeLineLayerWithIdentifier:sourceIdentifier:)` provided style or a default congestion style if above delegate method was not implemented.
-     - parameter navigationMapView: The NavigationMapView.
-     - parameter routes: The routes that the sender is asking about.
-     - returns: A `LineString` object that defines the shape of the route, or `nil` in case of default behavior.
-     */
-    func navigationMapView(_ navigationMapView: NavigationMapView, shapeFor routes: [Route]) -> LineString?
-    
-    /**
-     Asks the receiver to return an `LineString` that describes the geometry of the route casing.
-     
-     Resulting `LineString` will then be styled using `NavigationMapView.navigationMapView(_:routeCasingLineLayerWithIdentifier:sourceIdentifier:)` provided style or a default style if above delegate method was not implemented.
+     Resulting `FeatureCollection` will then be styled using `NavigationMapView.navigationMapView(_:routeLineLayerWithIdentifier:sourceIdentifier:)` provided style or a default congestion style if above delegate method was not implemented.
      - parameter navigationMapView: The NavigationMapView.
      - parameter route: The route that the sender is asking about.
-     - returns: A `LineString` object that defines the shape of the route casing, or `nil` in case of default behavior.
+     - returns: A `FeatureCollection` object that defines the shape and properties of the route, or `nil` in case of default behavior.
      */
-    func navigationMapView(_ navigationMapView: NavigationMapView, casingShapeFor route: Route) -> LineString?
+    func navigationMapView(_ navigationMapView: NavigationMapView, shapeFor route: Route) -> FeatureCollection?
+    
+    /**
+     Asks the receiver to return an `FeatureCollection` that describes the geometry of the route casing.
+     
+     Resulting `FeatureCollection` will then be styled using `NavigationMapView.navigationMapView(_:routeCasingLineLayerWithIdentifier:sourceIdentifier:)` provided style or a default style if above delegate method was not implemented.
+     - parameter navigationMapView: The NavigationMapView.
+     - parameter route: The route that the sender is asking about.
+     - returns: A `FeatureCollection` object that defines the shape and properties of the route casing, or `nil` in case of default behavior.
+     */
+    func navigationMapView(_ navigationMapView: NavigationMapView, casingShapeFor route: Route) -> FeatureCollection?
 
     /**
      Asks the receiver to return a `CircleLayer` for waypoints, given an identifier and source.
@@ -145,7 +145,7 @@ public extension NavigationMapViewDelegate {
     /**
      `UnimplementedLogging` prints a warning to standard output the first time this method is called.
      */
-    func navigationMapView(_ navigationMapView: NavigationMapView, shapeFor routes: [Route]) -> LineString? {
+    func navigationMapView(_ navigationMapView: NavigationMapView, shapeFor route: Route) -> FeatureCollection? {
         logUnimplemented(protocolType: NavigationMapViewDelegate.self, level: .debug)
         return nil
     }
@@ -153,7 +153,7 @@ public extension NavigationMapViewDelegate {
     /**
      `UnimplementedLogging` prints a warning to standard output the first time this method is called.
      */
-    func navigationMapView(_ navigationMapView: NavigationMapView, casingShapeFor route: Route) -> LineString? {
+    func navigationMapView(_ navigationMapView: NavigationMapView, casingShapeFor route: Route) -> FeatureCollection? {
         logUnimplemented(protocolType: NavigationMapViewDelegate.self, level: .debug)
         return nil
     }

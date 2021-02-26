@@ -558,11 +558,11 @@ extension ViewController: NavigationMapViewDelegate {
         return lineLayer
     }
     
-    func navigationMapView(_ navigationMapView: NavigationMapView, shapeFor routes: [Route]) -> LineString? {
+    func navigationMapView(_ navigationMapView: NavigationMapView, shapeFor route: Route) -> FeatureCollection? {
         return nil
     }
     
-    func navigationMapView(_ navigationMapView: NavigationMapView, casingShapeFor route: Route) -> LineString? {
+    func navigationMapView(_ navigationMapView: NavigationMapView, casingShapeFor route: Route) -> FeatureCollection? {
         return nil
     }
 }

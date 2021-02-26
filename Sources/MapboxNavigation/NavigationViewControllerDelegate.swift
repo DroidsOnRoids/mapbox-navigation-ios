@@ -140,18 +140,18 @@ public protocol NavigationViewControllerDelegate: VisualInstructionDelegate {
     func navigationViewController(_ navigationViewController: NavigationViewController, routeCasingLineLayerWithIdentifier identifier: String, sourceIdentifier: String) -> LineLayer?
 
     /**
-     Returns an `LineString` that represents the path of the routes line.
+     Returns an `FeatureCollection` that represents the path of the routes line.
 
-     If this method is unimplemented, the navigation view controller’s map view represents the route line using an `Feature` based on `route`’s `coordinates` property.
+     If this method is unimplemented, the navigation view controller’s map view represents the route line using an `FeatureCollection` based on `route`’s `coordinates` property.
      */
-    func navigationViewController(_ navigationViewController: NavigationViewController, shapeFor routes: [Route]) -> LineString?
+    func navigationViewController(_ navigationViewController: NavigationViewController, shapeFor route: Route) -> FeatureCollection?
 
     /**
-     Returns an `LineString` that represents the path of the route line’s casing.
+     Returns an `FeatureCollection` that represents the path of the route line’s casing.
 
-     If this method is unimplemented, the navigation view controller’s map view represents the route line’s casing using an `Feature` identical to the one returned by `navigationViewController(_:shapeFor:)`.
+     If this method is unimplemented, the navigation view controller’s map view represents the route line’s casing using an `FeatureCollection` identical to the one returned by `navigationViewController(_:shapeFor:)`.
      */
-    func navigationViewController(_ navigationViewController: NavigationViewController, casingShapeFor route: Route) -> LineString?
+    func navigationViewController(_ navigationViewController: NavigationViewController, casingShapeFor route: Route) -> FeatureCollection?
     
     /**
      Called when the user taps to select a route on the navigation view controller’s map view.
@@ -297,7 +297,7 @@ public extension NavigationViewControllerDelegate {
     /**
      `UnimplementedLogging` prints a warning to standard output the first time this method is called.
      */
-    func navigationViewController(_ navigationViewController: NavigationViewController, shapeFor routes: [Route]) -> LineString? {
+    func navigationViewController(_ navigationViewController: NavigationViewController, shapeFor route: Route) -> FeatureCollection? {
         logUnimplemented(protocolType: NavigationViewControllerDelegate.self,  level: .debug)
         return nil
     }
@@ -305,7 +305,7 @@ public extension NavigationViewControllerDelegate {
     /**
      `UnimplementedLogging` prints a warning to standard output the first time this method is called.
      */
-    func navigationViewController(_ navigationViewController: NavigationViewController, casingShapeFor route: Route) -> LineString? {
+    func navigationViewController(_ navigationViewController: NavigationViewController, casingShapeFor route: Route) -> FeatureCollection? {
         logUnimplemented(protocolType: NavigationViewControllerDelegate.self,  level: .debug)
         return nil
     }

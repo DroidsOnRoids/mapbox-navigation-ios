@@ -416,9 +416,6 @@ open class NavigationMapView: UIView {
         
         mapView.cameraManager.setCamera(to: newCamera, animated: animated, completion: nil)
     }
-    
-    var routeFeatures = [Feature]()
-    var casingFeatures = [Feature]()
 
     public func show(_ routes: [Route], legIndex: Int = 0) {
         removeRoutes()
@@ -426,41 +423,6 @@ open class NavigationMapView: UIView {
         self.routes = routes
         
         guard let mainRoute = routes.first else { return }
-        guard let polyline = delegate?.navigationMapView(self, shapeFor: routes) ?? shape(for: routes, legIndex: legIndex) else { return }
-        guard let mainPolylineSimplified = delegate?.navigationMapView(self, casingShapeFor: mainRoute) ?? shape(forCasingOf: mainRoute, legIndex: legIndex) else { return }
-
-        let sourceIdentifier = IdentifierString.routesSource
-        let casingSourceIdentifier = IdentifierString.routeCasingSource
-
-        if let _ = try? mapView.style.getSource(identifier: sourceIdentifier, type: GeoJSONSource.self).get(),
-           let _ = try? mapView.style.getSource(identifier: casingSourceIdentifier, type: GeoJSONSource.self).get() {
-            let routesSource = Feature.init(polyline)
-            let routeCasingSource = Feature.init(mainPolylineSimplified)
-            mapView.style.updateGeoJSON(for: sourceIdentifier, with: routesSource)
-            mapView.style.updateGeoJSON(for: casingSourceIdentifier, with: routeCasingSource)
-        } else {
-            var routesSource = GeoJSONSource()
-            var routeCasingSource = GeoJSONSource()
-            routesSource.data = .geometry(.lineString(polyline))
-            routesSource.lineMetrics = true
-            routeCasingSource.data = .geometry(.lineString(mainPolylineSimplified))
-            routeCasingSource.lineMetrics = true
-
-            //TODO: add routesSource and routeCasingSource below
-
-            let routesIdentifier = IdentifierString.routes
-            let routeCasingIdentifier = IdentifierString.routeCasing
-
-            var routesLayer = delegate?.navigationMapView(self,
-                                                          routeLineLayerWithIdentifier: routesIdentifier,
-                                                          sourceIdentifier: sourceIdentifier) ?? routeSyleLayer(identifier:routesIdentifier, source: sourceIdentifier)
-            var routeCasingLayer = delegate?.navigationMapView(self,
-                                                               routeLineLayerWithIdentifier: casingSourceIdentifier,
-                                                               sourceIdentifier: casingSourceIdentifier) ?? routeCasingStyleLayer(identifier: routeCasingIdentifier, source: casingSourceIdentifier)
-
-            //TODO: add routesLayer and routeCasingLayer below
-        }
-
         var parentLayerIdentifier: String? = nil
         for (index, route) in routes.enumerated() {
             if index == 0, routeLineTracksTraversal {
@@ -469,31 +431,31 @@ open class NavigationMapView: UIView {
             
             parentLayerIdentifier = addRouteLayer(route, below: parentLayerIdentifier, isMainRoute: index == 0)
             parentLayerIdentifier = addRouteCasingLayer(route, below: parentLayerIdentifier, isMainRoute: index == 0)
+
+            guard let routeFeatures = delegate?.navigationMapView(self, shapeFor: mainRoute) ?? shape(for: mainRoute, legIndex: legIndex, isMainRoute: index == 0) else { return }
+            guard let casingFeatures = delegate?.navigationMapView(self, casingShapeFor: mainRoute) ?? shape(forCasingOf: mainRoute, legIndex: legIndex) else { return }
+
+            //add the call to form sources and layers to form routeFeatures and casingFeatures
         }
     }
 
-    func shape(for routes: [Route], legIndex: Int?) -> LineString? {
-        guard var coordinates = routes.first?.shape?.coordinates else { return nil }
-
-        routeFeatures = routes.first!.congestionFeatures(legIndex: legIndex, isAlternativeRoute: false, roadClassesWithOverriddenCongestionLevels: roadClassesWithOverriddenCongestionLevels)
-        if routes.count == 1 { return routes.first?.shape }
-
-        var altRoutesFeature = [Feature]()
-        for route in routes.suffix(from: 1) {
-            if let currentCoordinates = route.shape?.coordinates {
-                coordinates = coordinates + currentCoordinates
-                var feature = Feature(LineString(currentCoordinates))
-                feature.properties = ["isAlternativeRoute": true]
-                altRoutesFeature.append(feature)
+    func shape(for route: Route, legIndex: Int?, isMainRoute: Bool?) -> FeatureCollection? {
+        let isMain = (isMainRoute != nil) ? isMainRoute! : true
+        if isMain {
+            let routeFeatures = route.congestionFeatures(legIndex: legIndex, isAlternativeRoute: !isMain, roadClassesWithOverriddenCongestionLevels: roadClassesWithOverriddenCongestionLevels)
+            return FeatureCollection(features: routeFeatures)
+        } else {
+            if let shape = route.shape {
+                var routeFeature = Feature(shape)
+                routeFeature.properties = ["isAlternativeRoute": true]
+                return FeatureCollection(features: [routeFeature])
             }
         }
-        routeFeatures = routeFeatures + altRoutesFeature
-        return LineString(coordinates)
+        return nil
     }
 
-    func shape(forCasingOf route: Route, legIndex: Int?) -> LineString? {
-        casingFeatures = [Feature]()
-
+    func shape(forCasingOf route: Route, legIndex: Int?) -> FeatureCollection? {
+        var casingFeatures = [Feature]()
         for (index, leg) in route.legs.enumerated() {
             let legCoordinates: [CLLocationCoordinate2D] = leg.steps.enumerated().reduce([]) { allCoordinates, current in
                 let index = current.offset
@@ -505,7 +467,7 @@ open class NavigationMapView: UIView {
             feature.properties = [CurrentLegAttribute: (legIndex != nil) ? index == legIndex : index == 0]
             casingFeatures.append(feature)
         }
-        return route.shape
+        return FeatureCollection(features:casingFeatures)
     }
 
     //TODO: add delegate chain
