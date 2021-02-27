@@ -26,7 +26,7 @@ open class PassiveLocationDataSource: NSObject {
         let runLoopExecutor = try! RunLoopExecutorFactory.build()
         let historyRecorder = try! HistoryRecorderHandle.build(forConfig: config)
         let cache = try! CacheFactory.build(for: TilesConfig(), config: config, runLoop: runLoopExecutor, historyRecorder: historyRecorder)
-        self.graphAccessor = try! GraphAccessor(cache: cache)
+        self.graphAccessor = GraphAccessor(try! MapboxNavigationNative.GraphAccessor(cache: cache))
         self.navigator = try! Navigator(config: config, runLoopExecutor: runLoopExecutor, cache: cache, historyRecorder: historyRecorder)
 
         self.systemLocationManager = systemLocationManager ?? NavigationLocationManager()

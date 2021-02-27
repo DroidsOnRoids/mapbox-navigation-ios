@@ -37,7 +37,7 @@ open class RouteController: NSObject {
         let runLoopExecutor = try! RunLoopExecutorFactory.build()
         let historyRecorder = try! HistoryRecorderHandle.build(forConfig: config)
         let cache = try! CacheFactory.build(for: TilesConfig(), config: config, runLoop: runLoopExecutor, historyRecorder: historyRecorder)
-        let graphAccessor = try! GraphAccessor(cache: cache)
+        let graphAccessor = GraphAccessor(try! MapboxNavigationNative.GraphAccessor(cache: cache))
         let navigator = try! Navigator(config: config, runLoopExecutor: runLoopExecutor, cache: cache, historyRecorder: historyRecorder)
         try! navigator.setElectronicHorizonObserverFor(self)
         return NavigatorResources(navigator: navigator, historyRecorder: historyRecorder, graphAccessor: graphAccessor)
