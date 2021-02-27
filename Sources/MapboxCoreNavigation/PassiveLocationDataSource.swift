@@ -108,9 +108,9 @@ open class PassiveLocationDataSource: NSObject {
 
     public var graphAccessor: GraphAccessor
 
-    public var roadObjectsStore: RoadObjectsStore {
-        return try! navigator.roadObjectStore()
-    }
+    public lazy var roadObjectsStore: RoadObjectsStore = {
+        return RoadObjectsStore(try! navigator.roadObjectStore())
+    }()
 
     public var peer: MBXPeerWrapper?
     
