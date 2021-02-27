@@ -39,7 +39,6 @@ open class RouteController: NSObject {
         let cache = try! CacheFactory.build(for: TilesConfig(), config: config, runLoop: runLoopExecutor, historyRecorder: historyRecorder)
         let graphAccessor = GraphAccessor(try! MapboxNavigationNative.GraphAccessor(cache: cache))
         let navigator = try! Navigator(config: config, runLoopExecutor: runLoopExecutor, cache: cache, historyRecorder: historyRecorder)
-        try! navigator.setElectronicHorizonObserverFor(self)
         return NavigatorResources(navigator: navigator, historyRecorder: historyRecorder, graphAccessor: graphAccessor)
     }()
     
@@ -156,7 +155,15 @@ open class RouteController: NSObject {
     /**
      Delegate for Electronic Horizon updates.
      */
-    public weak var electronicHorizonDelegate: EHorizonDelegate?
+    public weak var electronicHorizonDelegate: EHorizonDelegate? {
+        didSet {
+            if delegate != nil {
+                try! self.navigator.setElectronicHorizonObserverFor(self)
+            } else {
+                try! self.navigator.setElectronicHorizonObserverFor(nil)
+            }
+        }
+    }
     
     /**
      The route controller’s associated location manager.
