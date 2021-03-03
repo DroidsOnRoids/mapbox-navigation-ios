@@ -64,6 +64,17 @@ public protocol RouteControllerDelegate: class {
      */
     @objc(routeController:didFailToRerouteWithError:)
     optional func routeController(_ routeController: RouteController, didFailToRerouteWith error: Error)
+
+    /**
+     Called when the route controller updates the route progress model.
+
+     - parameter routeController: The route controller that received the new locations.
+     - parameter progress: the RouteProgress model that was updated.
+     - parameter location: the guaranteed location, possibly snapped, associated with the progress update.
+     - parameter rawLocation: the raw location, from the location manager, associated with the progress update.
+     */
+    @objc(routeController:didUpdateProgress:withLocation:rawLocation:)
+    optional func routeController(_ routeController: RouteController, didUpdate progress: RouteProgress, with location: CLLocation, rawLocation: CLLocation)
     
     /**
      Called when the route controller’s location manager receives a location update.

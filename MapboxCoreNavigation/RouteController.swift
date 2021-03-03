@@ -315,6 +315,11 @@ extension RouteController: CLLocationManagerDelegate {
           let remainingDistance = lineString.distance(from: closestCoordinate.coordinate) {
             let distanceTraveled = currentStep.distance - remainingDistance
             currentStepProgress.distanceTraveled = distanceTraveled
+
+            // Fire the delegate method
+            delegate?.routeController?(self, didUpdate: routeProgress, with: self.location!, rawLocation: location)
+
+            // Fire the notification (for now)
             NotificationCenter.default.post(name: .routeControllerProgressDidChange, object: self, userInfo: [
                 RouteControllerNotificationUserInfoKey.routeProgressKey: routeProgress,
                 RouteControllerNotificationUserInfoKey.locationKey: self.location!, //guaranteed value

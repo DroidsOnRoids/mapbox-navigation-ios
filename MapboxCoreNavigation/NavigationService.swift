@@ -161,6 +161,10 @@ extension MapboxNavigationService: RouteControllerDelegate {
         delegate?.navigationService(self, didFailToRerouteWith: error)
     }
 
+    public func routeController(_ routeController: RouteController, didUpdate progress: RouteProgress, with location: CLLocation, rawLocation: CLLocation) {
+        delegate?.navigationService(self, didUpdate: progress, with: location, rawLocation: rawLocation)
+    }
+
     public func routeController(_ routeController: RouteController, didArriveAt waypoint: Waypoint) -> Bool {
         delegate?.navigationService(self, didArriveAt: waypoint) ?? true
     }
