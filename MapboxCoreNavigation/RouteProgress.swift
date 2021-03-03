@@ -85,6 +85,24 @@ open class RouteProgress: NSObject {
     @objc public var currentLegProgress: RouteLegProgress
 
     /**
+     The leg following the current leg along this route.
+
+     If this leg is the last leg of the route, this property is set to nil.
+     */
+    public var upcomingLeg: RouteLeg? {
+        return legIndex + 1 < route.legs.endIndex ? route.legs[legIndex + 1] : nil
+    }
+
+    /**
+     The step following the current step along this route.
+
+     The upcoming step may be part of a different RouteLeg than the current step. If it is the last step along the route, this property is set to nil.
+     */
+    @objc public var upcomingStep: RouteStep? {
+        return currentLegProgress.upcomingStep ?? upcomingLeg?.steps.first
+    }
+
+    /**
      Tuple containing a `CongestionLevel` and a corresponding `TimeInterval` representing the expected travel time for this segment.
      */
     public typealias TimedCongestionLevel = (CongestionLevel, TimeInterval)
