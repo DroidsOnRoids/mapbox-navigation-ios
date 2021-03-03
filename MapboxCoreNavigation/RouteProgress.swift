@@ -307,7 +307,7 @@ open class RouteLegProgress: NSObject {
 
      If there is no `upcomingStep`, nil is returned.
      */
-    @objc public var upComingStep: RouteStep? {
+    @objc public var upcomingStep: RouteStep? {
         guard stepIndex + 1 < leg.steps.endIndex else {
             return nil
         }
@@ -355,7 +355,7 @@ open class RouteLegProgress: NSObject {
      */
     @objc public var nearbyCoordinates: [CLLocationCoordinate2D] {
         let priorCoords = priorStep?.coordinates ?? []
-        let upcomingCoords = upComingStep?.coordinates ?? []
+        let upcomingCoords = upcomingStep?.coordinates ?? []
         let currentCoords = currentStep.coordinates ?? []
         let nearby = priorCoords + currentCoords + upcomingCoords
         assert(!nearby.isEmpty, "Step must have coordinates")

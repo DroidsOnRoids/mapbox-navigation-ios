@@ -290,7 +290,7 @@ open class NavigationMapView: MGLMapView, UIGestureRecognizerDelegate {
             return
         }
     
-        if let upcomingStep = routeProgress.currentLegProgress.upComingStep,
+        if let upcomingStep = routeProgress.currentLegProgress.upcomingStep,
             upcomingStep.maneuverDirection == .straightAhead || upcomingStep.maneuverDirection == .slightLeft || upcomingStep.maneuverDirection == .slightRight {
             preferredFramesPerSecond = shouldPositionCourseViewFrameByFrame ? FrameIntervalOptions.defaultFramesPerSecond : FrameIntervalOptions.decreasedFramesPerSecond
         } else if durationUntilNextManeuver > FrameIntervalOptions.durationUntilNextManeuver &&

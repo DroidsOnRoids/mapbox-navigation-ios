@@ -277,7 +277,7 @@ public class CarPlayNavigationViewController: UIViewController, MGLMapViewDelega
                 tertiaryManeuver.attributedInstructionVariants = [attributedTertiary]
             }
             
-            if let upcomingStep = routeController.routeProgress.currentLegProgress.upComingStep {
+            if let upcomingStep = routeController.routeProgress.currentLegProgress.upcomingStep {
                 let distance = distanceFormatter.measurement(of: upcomingStep.distance)
                 tertiaryManeuver.initialTravelEstimates = CPTravelEstimates(distanceRemaining: distance, timeRemaining: upcomingStep.expectedTravelTime)
             }
