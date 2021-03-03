@@ -175,7 +175,7 @@ open class NavigationMapView: MGLMapView, UIGestureRecognizerDelegate {
      
      If the view conforms to `UserCourseView`, its `UserCourseView.update(location:pitch:direction:animated:)` method is frequently called to ensure that its visual appearance matches the map’s camera.
      */
-    @objc public var userCourseView: UIView? {
+    @objc public var userCourseView: UIView! {
         didSet {
             oldValue?.removeFromSuperview()
             if let userCourseView = userCourseView {
