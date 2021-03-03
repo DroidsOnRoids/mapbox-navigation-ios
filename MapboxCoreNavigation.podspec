@@ -40,7 +40,7 @@ Pod::Spec.new do |s|
   s.requires_arc = true
   s.module_name = "MapboxCoreNavigation"
 
-  s.dependency "MapboxDirections.swift", "~> 0.23.0"
+  s.dependency "MapboxDirections.swift", "~> 0.30.0"
   s.dependency "Turf", "~> 1.0"
 
   # `swift_version` was introduced in CocoaPods 1.4.0. Without this check, if a user were to
