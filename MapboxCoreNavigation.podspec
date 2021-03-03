@@ -42,7 +42,7 @@ Pod::Spec.new do |s|
 
   s.dependency "MapboxDirections.swift", "~> 0.23.0"
   s.dependency "MapboxMobileEvents", "~> 0.5"
-  s.dependency "Turf", "~> 0.2"
+  s.dependency "Turf", "~> 1.0"
 
   # `swift_version` was introduced in CocoaPods 1.4.0. Without this check, if a user were to
   # directly specify this podspec while using <1.4.0, ruby would throw an unknown method error.
