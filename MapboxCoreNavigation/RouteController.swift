@@ -196,7 +196,7 @@ open class RouteController: NSObject, Router {
      The most recently received user location.
      - note: This is a raw location received from `locationManager`. To obtain an idealized location, use the `location` property.
      */
-    var rawLocation: CLLocation? {
+    @objc public var rawLocation: CLLocation? {
         didSet {
             updateDistanceToManeuver()
         }

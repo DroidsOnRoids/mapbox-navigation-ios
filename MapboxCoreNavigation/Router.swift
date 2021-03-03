@@ -10,4 +10,5 @@ import MapboxDirections
     func endNavigation(feedback: EndOfRouteFeedback?)
 
     @objc var location: CLLocation? { get }
+    @objc var rawLocation: CLLocation? { get }
 }
