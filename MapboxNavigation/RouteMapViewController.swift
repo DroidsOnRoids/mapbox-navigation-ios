@@ -272,7 +272,7 @@ class RouteMapViewController: UIViewController {
         instructionsBannerView.updateDistance(for: routeController.routeProgress.currentLegProgress.currentStepProgress)
 
         mapView.addArrow(route: routeController.routeProgress.route, legIndex: routeController.routeProgress.legIndex, stepIndex: routeController.routeProgress.currentLegProgress.stepIndex + 1)
-        mapView.showRoutes([routeController.routeProgress.route], legIndex: routeController.routeProgress.legIndex)
+        mapView.show([routeController.routeProgress.route], legIndex: routeController.routeProgress.legIndex)
         mapView.showWaypoints(routeController.routeProgress.route)
 
         if annotatesSpokenInstructions {
@@ -402,7 +402,7 @@ class RouteMapViewController: UIViewController {
 
         if currentLegIndexMapped != routeProgress.legIndex {
             mapView.showWaypoints(routeProgress.route, legIndex: routeProgress.legIndex)
-            mapView.showRoutes([routeProgress.route], legIndex: routeProgress.legIndex)
+            mapView.show([routeProgress.route], legIndex: routeProgress.legIndex)
 
             currentLegIndexMapped = routeProgress.legIndex
         }
@@ -863,7 +863,7 @@ extension RouteMapViewController: NavigationViewDelegate {
     func showRouteIfNeeded() {
         guard isViewLoaded && view.window != nil else { return }
         guard !mapView.showsRoute else { return }
-        mapView.showRoutes([routeController.routeProgress.route], legIndex: routeController.routeProgress.legIndex)
+        mapView.show([routeController.routeProgress.route], legIndex: routeController.routeProgress.legIndex)
         mapView.showWaypoints(routeController.routeProgress.route, legIndex: routeController.routeProgress.legIndex)
 
         if routeController.routeProgress.currentLegProgress.stepIndex + 1 <= routeController.routeProgress.currentLegProgress.leg.steps.count {

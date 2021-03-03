@@ -180,7 +180,7 @@ public class CarPlayNavigationViewController: UIViewController, MGLMapViewDelega
     
     public func mapView(_ mapView: MGLMapView, didFinishLoading style: MGLStyle) {
         self.mapView?.addArrow(route: routeController.routeProgress.route, legIndex: routeController.routeProgress.legIndex, stepIndex: routeController.routeProgress.currentLegProgress.stepIndex + 1)
-        self.mapView?.showRoutes([routeController.routeProgress.route])
+        self.mapView?.show([routeController.routeProgress.route])
         self.mapView?.showWaypoints(routeController.routeProgress.route)
         self.mapView?.recenterMap()
     }
@@ -221,7 +221,7 @@ public class CarPlayNavigationViewController: UIViewController, MGLMapViewDelega
     
     func updateRouteOnMap() {
         mapView?.addArrow(route: routeController.routeProgress.route, legIndex: routeController.routeProgress.legIndex, stepIndex: routeController.routeProgress.currentLegProgress.stepIndex + 1)
-        mapView?.showRoutes([routeController.routeProgress.route], legIndex: routeController.routeProgress.legIndex)
+        mapView?.show([routeController.routeProgress.route], legIndex: routeController.routeProgress.legIndex)
         mapView?.showWaypoints(routeController.routeProgress.route, legIndex: routeController.routeProgress.legIndex)
     }
     

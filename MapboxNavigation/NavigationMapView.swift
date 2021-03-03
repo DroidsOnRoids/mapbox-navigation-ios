@@ -422,7 +422,7 @@ open class NavigationMapView: MGLMapView, UIGestureRecognizerDelegate {
         removeRoutes()
         removeWaypoints()
         
-        showRoutes(routes)
+        show(routes)
         showWaypoints(active)
         
         fit(to: active, facing: 0, padding: padding, animated: animated)
@@ -442,7 +442,7 @@ open class NavigationMapView: MGLMapView, UIGestureRecognizerDelegate {
     /**
      Adds or updates both the route line and the route line casing
      */
-    @objc public func showRoutes(_ routes: [Route], legIndex: Int = 0) {
+    @objc public func show(_ routes: [Route], legIndex: Int = 0) {
         guard let style = style else { return }
         guard let mainRoute = routes.first else { return }
         self.routes = routes
