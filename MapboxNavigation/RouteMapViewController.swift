@@ -250,7 +250,7 @@ class RouteMapViewController: UIViewController {
 
     func showFeedback(source: FeedbackSource = .user) {
         guard let parent = parent else { return }
-        let feedbackViewController = FeedbackViewController(eventsManager: routeController.eventsManager)
+        let feedbackViewController = FeedbackViewController()
         parent.present(feedbackViewController, animated: true, completion: nil)
     }
 
@@ -518,7 +518,7 @@ class RouteMapViewController: UIViewController {
 
     fileprivate func rating(for stars: Int) -> Int {
         assert(stars >= 0 && stars <= 5)
-        guard stars > 0 else { return MMEEventsManager.unrated } //zero stars means this was unrated.
+        guard stars > 0 else { return -1 } //zero stars means this was unrated.
         return (stars - 1) * 25
     }
 

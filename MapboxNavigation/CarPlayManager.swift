@@ -198,8 +198,6 @@ public class CarPlayManager: NSObject {
      */
     @objc public var isConnectedToCarPlay = false
 
-    public var eventsManager = EventsManager()
-
     lazy var fullDateComponentsFormatter: DateComponentsFormatter = {
         let formatter = DateComponentsFormatter()
         formatter.unitsStyle = .full
@@ -245,17 +243,12 @@ extension CarPlayManager: CPApplicationDelegate {
         let mapTemplate = self.mapTemplate(for: interfaceController, viewController: viewController)
         mainMapTemplate = mapTemplate
         interfaceController.setRootTemplate(mapTemplate, animated: false)
-
-        let timestamp = Date().ISO8601
-        sendCarPlayConnectEvent(timestamp)
     }
 
     public func application(_ application: UIApplication, didDisconnectCarInterfaceController interfaceController: CPInterfaceController, from window: CPWindow) {
         isConnectedToCarPlay = false
         self.interfaceController = nil
         carWindow?.isHidden = true
-        let timestamp = Date().ISO8601
-        sendCarPlayDisconnectEvent(timestamp)
 
         if let shouldDisableIdleTimer = delegate?.carplayManagerShouldDisableIdleTimer?(self) {
             UIApplication.shared.isIdleTimerDisabled = !shouldDisableIdleTimer
@@ -330,18 +323,6 @@ extension CarPlayManager: CPApplicationDelegate {
         closeButton.image = UIImage(named: "carplay_close", in: bundle, compatibleWith: traitCollection)
 
         return closeButton
-    }
-
-    func sendCarPlayConnectEvent(_ timestamp: String) {
-        let dateCreatedAttribute = [MMEEventKeyCreated: timestamp]
-        eventsManager.manager.enqueueEvent(withName: MMEventTypeCarplayConnect, attributes: dateCreatedAttribute)
-        eventsManager.manager.flush()
-    }
-
-    func sendCarPlayDisconnectEvent(_ timestamp: String) {
-        let dateCreatedAttribute = [MMEEventKeyCreated: timestamp]
-        eventsManager.manager.enqueueEvent(withName: MMEventTypeCarplayDisconnect, attributes: dateCreatedAttribute)
-        eventsManager.manager.flush()
     }
 
     func resetPanButtons(_ mapTemplate: CPMapTemplate) {
@@ -712,9 +693,9 @@ extension CarPlayManager: CPMapTemplateDelegate {
         if self.simulatesLocations {
             let locationManager = SimulatedLocationManager(route: route)
             locationManager.speedMultiplier = self.simulatedSpeedMultiplier
-            return RouteController(along: route, locationManager: locationManager, eventsManager: eventsManager)
+            return RouteController(along: route, locationManager: locationManager)
         } else {
-            return RouteController(along: route, eventsManager: eventsManager)
+            return RouteController(along: route)
         }
     }
 }

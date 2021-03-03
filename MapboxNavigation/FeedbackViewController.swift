@@ -30,8 +30,8 @@ extension FeedbackViewController: UIViewControllerTransitioningDelegate {
     /**
      Called when the user submits a feedback event.
      */
-    @objc(feedbackViewController:didSendFeedbackItem:UUID:)
-    optional func feedbackViewController(_ feedbackViewController: FeedbackViewController, didSend feedbackItem: FeedbackItem, uuid: UUID)
+    @objc(feedbackViewController:didSendFeedbackItem:)
+    optional func feedbackViewController(_ feedbackViewController: FeedbackViewController, didSend feedbackItem: FeedbackItem)
     
     /**
      Called when a `FeedbackViewController` is dismissed for any reason without giving explicit feedback.
@@ -97,29 +97,14 @@ public class FeedbackViewController: UIViewController, DismissDraggable, UIGestu
     }
     
     /**
-     The events manager used to send feedback events.
+     Initialize a new FeedbackViewController.
      */
-    public var eventsManager: EventsManager
-    
-    var uuid: UUID? {
-        return eventsManager.recordFeedback()
-    }
-    
-    /**
-     Initialize a new FeedbackViewController from an `EventsManager`.
-     */
-    @objc public init(eventsManager: EventsManager) {
-        self.eventsManager = eventsManager
+    @objc public init() {
         super.init(nibName: nil, bundle: nil)
         commonInit()
     }
-
-    public override func encode(with aCoder: NSCoder) {
-        aCoder.encode(eventsManager, forKey: "EventsManager")
-    }
     
     required public init?(coder aDecoder: NSCoder) {
-        eventsManager = aDecoder.decodeObject(of: [EventsManager.self], forKey: "EventsManager") as? EventsManager ?? EventsManager(accessToken: nil)
         super.init(coder: aDecoder)
         commonInit()
     }
@@ -229,10 +214,7 @@ public class FeedbackViewController: UIViewController, DismissDraggable, UIGestu
     }
     
     func send(_ item: FeedbackItem) {
-        if let uuid = uuid {
-            delegate?.feedbackViewController?(self, didSend: item, uuid: uuid)
-            eventsManager.updateFeedback(uuid: uuid, type: item.feedbackType, source: .user, description: nil)
-        }
+        delegate?.feedbackViewController?(self, didSend: item)
         
         guard let parent = presentingViewController else {
             dismiss(animated: true)
@@ -246,10 +228,6 @@ public class FeedbackViewController: UIViewController, DismissDraggable, UIGestu
     
     func dismissFeedbackItem() {
         delegate?.feedbackViewControllerDidCancel?(self)
-
-        if let uuid = uuid {
-            eventsManager.cancelFeedback(uuid: uuid)
-        }
    
         dismiss(animated: true, completion: nil)
     }

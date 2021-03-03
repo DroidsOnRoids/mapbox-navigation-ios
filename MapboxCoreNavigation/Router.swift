@@ -3,7 +3,6 @@ import CoreLocation
 import MapboxDirections
 
 @objc public protocol Router: class, CLLocationManagerDelegate {
-    @objc var eventsManager: EventsManager! { get }
     @objc var locationManager: NavigationLocationManager! { get }
     
     var usesDefaultUserInterface: Bool { get }
