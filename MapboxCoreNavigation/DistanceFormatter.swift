@@ -121,8 +121,6 @@ extension NSAttributedStringKey {
 /// Provides appropriately formatted, localized descriptions of linear distances.
 @objc(MBDistanceFormatter)
 open class DistanceFormatter: LengthFormatter {
-    /// True to favor brevity over precision.
-    var approx: Bool
     
     let nonFractionalLengthFormatter = LengthFormatter()
     
@@ -157,20 +155,13 @@ open class DistanceFormatter: LengthFormatter {
      
      - parameter approximate: approximates the distances.
      */
-    @objc public init(approximate: Bool = false) {
-        self.approx = approximate
+    @objc public override init() {
         super.init()
         self.numberFormatter.locale = .nationalizedCurrent
     }
     
     public required init?(coder decoder: NSCoder) {
-        approx = decoder.decodeBool(forKey: "approximate")
         super.init(coder: decoder)
-    }
-    
-    open override func encode(with aCoder: NSCoder) {
-        super.encode(with: aCoder)
-        aCoder.encode(approx, forKey: "approximate")
     }
     
     func threshold(for distance: CLLocationDistance) -> RoundingTable.Threshold {

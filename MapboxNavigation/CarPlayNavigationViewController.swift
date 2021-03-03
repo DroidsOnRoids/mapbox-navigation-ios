@@ -30,7 +30,7 @@ public class CarPlayNavigationViewController: UIViewController, MGLMapViewDelega
     var previousSafeAreaInsets: UIEdgeInsets?
     var styleManager: StyleManager!
     
-    let distanceFormatter = DistanceFormatter(approximate: true)
+    let distanceFormatter = DistanceFormatter()
     
     var edgePadding: UIEdgeInsets {
         let padding:CGFloat = 15

@@ -76,7 +76,7 @@ class RouteMapViewController: UIViewController {
             populateName(for: destination, populated: { self.destination = $0 })
         }
     }
-    let distanceFormatter = DistanceFormatter(approximate: true)
+    let distanceFormatter = DistanceFormatter()
     var arrowCurrentStep: RouteStep?
     var isInOverviewMode = false {
         didSet {
