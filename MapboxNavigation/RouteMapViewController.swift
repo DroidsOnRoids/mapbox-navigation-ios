@@ -231,7 +231,7 @@ class RouteMapViewController: UIViewController {
 
     @objc func toggleOverview(_ sender: Any) {
         mapView.enableFrameByFrameCourseViewTracking(for: 3)
-        if let coordinates = routeController.routeProgress.route.coordinates, let userLocation = routeController.locationManager.location?.coordinate {
+        if let coordinates = routeController.routeProgress.route.coordinates, let userLocation = routeController.locationManager.location {
             mapView.setOverheadCameraView(from: userLocation, along: coordinates, for: overheadInsets)
         }
         isInOverviewMode = true
@@ -280,7 +280,7 @@ class RouteMapViewController: UIViewController {
         }
 
         if isInOverviewMode {
-            if let coordinates = routeController.routeProgress.route.coordinates, let userLocation = routeController.locationManager.location?.coordinate {
+            if let coordinates = routeController.routeProgress.route.coordinates, let userLocation = routeController.locationManager.location {
                 mapView.setOverheadCameraView(from: userLocation, along: coordinates, for: overheadInsets)
             }
         } else {

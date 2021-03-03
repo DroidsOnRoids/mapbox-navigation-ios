@@ -164,7 +164,7 @@ public class CarPlayNavigationViewController: UIViewController, MGLMapViewDelega
                                  legIndex: routeController.routeProgress.legIndex,
                                  stepIndex: routeController.routeProgress.currentLegProgress.stepIndex + 1)
             } else if tracksUserCourse && !newValue {
-                guard let userLocation = self.routeController.locationManager.location?.coordinate else {
+                guard let userLocation = self.routeController.locationManager.location else {
                     return
                 }
                 mapView?.enableFrameByFrameCourseViewTracking(for: 3)
