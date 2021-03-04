@@ -28,7 +28,7 @@ public enum SimulationMode: Int {
 
  If you use a navigation service by itself, call `start()` when the user is ready to begin navigating along the route.
  */
-public protocol NavigationService: CLLocationManagerDelegate {
+public protocol NavigationService {
     /**
      The router object that tracks the user’s progress as they travel along a predetermined route.
      */
@@ -66,13 +66,15 @@ public class MapboxNavigationService: NSObject, NavigationService {
     /**
      The active router. By default, a `RouteController`.
      */
-    public let router: Router!
+    public var router: Router! {
+        return routeController
+    }
 
     /**
      Use `routeProgress` from the active router.
      */
     public var routeProgress: RouteProgress {
-        return router.routeProgress
+        return routeController.routeProgress
     }
 
     /**
@@ -89,6 +91,8 @@ public class MapboxNavigationService: NSObject, NavigationService {
      The simulation mode of the service.
      */
     public var simulationMode: SimulationMode
+
+    private let routeController: RouteController
 
     /**
      Intializes a new `NavigationService`.
@@ -109,64 +113,27 @@ public class MapboxNavigationService: NSObject, NavigationService {
     ) {
         self.nativeLocationSource = locationSource ?? NavigationLocationManager()
         self.simulationMode = simulationMode
-
-        let routeController = RouteController(
+        self.routeController = RouteController(
             along: route,
             directions: directions ?? Directions.shared,
             locationManager: nativeLocationSource
         )
-        self.router = routeController
 
         super.init()
 
-        resumeNotifications()
-
         routeController.delegate = self
-        nativeLocationSource.delegate = self
     }
 
     deinit {
-        suspendNotifications()
         stop()
     }
 
     public func start() {
-        // Jump to the first coordinate on the route if the location source does
-        // not yet have a fixed location.
-        if router.location == nil, let coordinate = routeProgress.route.coordinates?.first {
-            let location = CLLocation(coordinate: coordinate, altitude: -1, horizontalAccuracy: -1, verticalAccuracy: -1, course: -1, speed: 0, timestamp: Date())
-            router.locationManager?(nativeLocationSource, didUpdateLocations: [location])
-        }
-
-        nativeLocationSource.startUpdatingHeading()
-        nativeLocationSource.startUpdatingLocation()
+        routeController.resume()
     }
 
     public func stop() {
-        nativeLocationSource.stopUpdatingHeading()
-        nativeLocationSource.stopUpdatingLocation()
-    }
-
-    func resumeNotifications() {
-        NotificationCenter.default.addObserver(self, selector: #selector(applicationWillTerminate), name: .UIApplicationWillTerminate, object: nil)
-    }
-
-    func suspendNotifications() {
-        NotificationCenter.default.removeObserver(self)
-    }
-
-    @objc private func applicationWillTerminate(_ notification: NSNotification) {
-        stop()
-    }
-}
-
-extension MapboxNavigationService: CLLocationManagerDelegate {
-    public func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
-        router.locationManager?(manager, didUpdateHeading: newHeading)
-    }
-
-    public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        router.locationManager?(manager, didUpdateLocations: locations)
+        routeController.suspendLocationUpdates()
     }
 }
 
