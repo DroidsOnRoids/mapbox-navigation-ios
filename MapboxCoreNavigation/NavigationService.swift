@@ -121,6 +121,7 @@ public class MapboxNavigationService: NSObject, NavigationService {
 
         super.init()
 
+        routeController.reroutesProactively = true
         routeController.delegate = self
     }
 
@@ -142,8 +143,8 @@ extension MapboxNavigationService: RouteControllerDelegate {
         delegate?.navigationService(self, willRerouteFrom: location)
     }
 
-    public func routeController(_ routeController: RouteController, didRerouteAlong route: Route) {
-        delegate?.navigationService(self, didRerouteAlong: route, at: nativeLocationSource.location, proactive: false)
+    public func routeController(_ routeController: RouteController, didRerouteAlong route: Route, proactive: Bool) {
+        delegate?.navigationService(self, didRerouteAlong: route, at: nativeLocationSource.location, proactive: proactive)
     }
 
     public func routeController(_ routeController: RouteController, didFailToRerouteWith error: Error) {

@@ -51,8 +51,8 @@ public protocol RouteControllerDelegate: class {
      - parameter routeController: The route controller that has calculated a new route.
      - parameter route: The new route.
      */
-    @objc(routeController:didRerouteAlongRoute:)
-    optional func routeController(_ routeController: RouteController, didRerouteAlong route: Route)
+    @objc(routeController:didRerouteAlongRoute:proactive:)
+    optional func routeController(_ routeController: RouteController, didRerouteAlong route: Route, proactive: Bool)
     
     /**
      Called when the route controller fails to receive a new route.
