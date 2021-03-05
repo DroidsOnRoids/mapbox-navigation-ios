@@ -103,8 +103,7 @@ open class RouteController: NSObject, Router {
 
         self.locationManager.delegate = self
         resumeNotifications()
-
-        checkForUpdates()
+        
         checkForLocationUsageDescription()
         
         tunnelIntersectionManager.delegate = self
@@ -512,24 +511,6 @@ extension RouteController: CLLocationManagerDelegate {
             strongSelf.routeProgress.currentLegProgress.stepIndex = 0
             strongSelf.delegate?.routeController?(strongSelf, didRerouteAlong: route, proactive: strongSelf.didFindFasterRoute)
         }
-    }
-
-    private func checkForUpdates() {
-        #if TARGET_IPHONE_SIMULATOR
-            guard let version = Bundle(for: RouteController.self).object(forInfoDictionaryKey: "CFBundleShortVersionString") else { return }
-            let latestVersion = String(describing: version)
-            _ = URLSession.shared.dataTask(with: URL(string: "https://www.mapbox.com/mapbox-navigation-ios/latest_version")!, completionHandler: { (data, response, error) in
-                if let _ = error { return }
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else { return }
-
-                guard let data = data, let currentVersion = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .newlines) else { return }
-
-                if latestVersion != currentVersion {
-                    let updateString = NSLocalizedString("UPDATE_AVAILABLE", bundle: .mapboxCoreNavigation, value: "Mapbox Navigation SDK for iOS version %@ is now available.", comment: "Inform developer an update is available")
-                    print(String.localizedStringWithFormat(updateString, latestVersion), "https://github.com/mapbox/mapbox-navigation-ios/releases/tag/v\(latestVersion)")
-                }
-            }).resume()
-        #endif
     }
 
     private func checkForLocationUsageDescription() {
