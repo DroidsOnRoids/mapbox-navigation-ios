@@ -103,7 +103,7 @@ open class RouteController: NSObject, Router {
 
         self.locationManager.delegate = self
         resumeNotifications()
-        
+
         checkForLocationUsageDescription()
         
         tunnelIntersectionManager.delegate = self
@@ -402,7 +402,8 @@ extension RouteController: CLLocationManagerDelegate {
     @objc public func userIsOnRoute(_ location: CLLocation) -> Bool {
         
         // If the user has arrived, do not continue monitor reroutes, step progress, etc
-        guard !routeProgress.currentLegProgress.userHasArrivedAtWaypoint && (delegate?.routeController?(self, shouldPreventReroutesWhenArrivingAt: routeProgress.currentLeg.destination) ?? true) else {
+        if routeProgress.currentLegProgress.userHasArrivedAtWaypoint &&
+            (delegate?.routeController?(self, shouldPreventReroutesWhenArrivingAt: routeProgress.currentLeg.destination) ?? true) {
             return true
         }
 
